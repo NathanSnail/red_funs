@@ -3,7 +3,13 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#define SINCOS_WOBBLE 0
+#define SINCOS_WOBBLE 1
+#define GRID
+#define BASE_X 17920.00
+#define BASE_Y 7168.00
+#define BIOME_W 70
+#define BIOME_H 48
+
 int mod(int a, int b) {
 	int c = a % b;
 	if (c < 0) {
@@ -11,6 +17,7 @@ int mod(int a, int b) {
 	}
 	return c;
 }
+
 int SampleBiomeMapClampedWrapping(int x, int y) {
 	return mod(x, 2) * 2 + mod(y, 2);
 }
@@ -224,17 +231,17 @@ char proc(double x, double y) {
 	double y2;
 	char biome, new;
 
-	shifted_x = x;
-	shifted_y = y;
+	shifted_x = x + BASE_X;
+	shifted_y = y + BASE_Y;
 	subchunk_x = (int)shifted_x & 0x1ff;
 	subchunk_y = (int)shifted_y & 0x1ff;
-	new_x = 70;
+	new_x = BIOME_W;
 	chunk_x = ((int)shifted_x >> 9) % new_x;
 	chunk_y = (int)shifted_y >> 9;
 	if (chunk_x < 0) {
 		chunk_x = chunk_x + new_x;
 	}
-	new_y = 48 + -1;
+	new_y = BIOME_H + -1;
 	if (chunk_y < new_y) {
 		new_y = chunk_y;
 	}
@@ -332,14 +339,27 @@ Exit:
 
 int main() {
 	ConstructStatics();
-	LogStatics();
+	// LogStatics();
 	Image img;
 	unsigned short sz = 1 << 13;
 	new_image(&img, sz, sz);
+	int x = -3000, y = -3000;
 	Colour colours[4] = {{.r = 255}, {.g = 255}, {.b = 255}, {}};
+	Colour border = {.r = 255, .g = 255, .b = 255};
 	for (int i = 0; i < sz; i++) {
 		for (int j = 0; j < sz; j++) {
-			set_pixel(&img, i, j, colours[proc((double)i, (double)j)]);
+			int px = i + x, py = j + y;
+#ifdef GRID
+			if ((uint)mod(px, 512) - 254 < 5 ||
+			    (uint)mod(py, 512) - 254 < 5) {
+				set_pixel(&img, i, j, border);
+			} else {
+				set_pixel(&img, i, j, colours[proc(px, py)]);
+			}
+#else
+			set_pixel(&img, i, j, colours[proc(px, py)]);
+
+#endif
 		}
 	}
 	save_image(&img, "./out.bmp");
