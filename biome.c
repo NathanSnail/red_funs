@@ -4,7 +4,7 @@
 #include <sys/types.h>
 
 #define SINCOS_WOBBLE 1
-#define GRID
+// #define GRID
 #define BASE_X 17920.00
 #define BASE_Y 7168.00
 #define BIOME_W 70
@@ -341,9 +341,9 @@ int main() {
 	ConstructStatics();
 	// LogStatics();
 	Image img;
-	unsigned short sz = 1 << 13;
+	unsigned short sz = 128 + (1 << 9);
 	new_image(&img, sz, sz);
-	int x = -3000, y = -3000;
+	int x = 14780, y = -3646;
 	Colour colours[4] = {{.r = 255}, {.g = 255}, {.b = 255}, {}};
 	Colour border = {.r = 255, .g = 255, .b = 255};
 	for (int i = 0; i < sz; i++) {
@@ -357,7 +357,7 @@ int main() {
 				set_pixel(&img, i, j, colours[proc(px, py)]);
 			}
 #else
-			set_pixel(&img, i, j, colours[proc(px, py)]);
+			set_pixel(&img, i, sz - j - 1, colours[proc(px, py)]);
 
 #endif
 		}
