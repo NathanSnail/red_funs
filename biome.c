@@ -4,7 +4,6 @@
 #include <sys/types.h>
 
 #define SINCOS_WOBBLE 1
-// #define GRID
 #define BASE_X 17920.00
 #define BASE_Y 7168.00
 #define BIOME_W 70
@@ -223,7 +222,6 @@ char proc(double x, double y) {
 	int chunk_y;
 	double shifted_y;
 	double dVar1;
-	double dVar2;
 	double shifted_x;
 	int new_x;
 	int new_y;
@@ -342,24 +340,24 @@ int main() {
 	// LogStatics();
 	Image img;
 	unsigned short sz = 128 + (1 << 9);
-	new_image(&img, sz, sz);
-	int x = 14780, y = -3646;
+	int gs = 8;
+	new_image(&img, sz * gs, sz * gs);
+	int x = 29 * 512, y = -7 * 512;
+	x -= (sz - 512) / 2;
+	y -= (sz - 512) / 2;
 	Colour colours[4] = {{.r = 255}, {.g = 255}, {.b = 255}, {}};
-	Colour border = {.r = 255, .g = 255, .b = 255};
-	for (int i = 0; i < sz; i++) {
-		for (int j = 0; j < sz; j++) {
-			int px = i + x, py = j + y;
-#ifdef GRID
-			if ((uint)mod(px, 512) - 254 < 5 ||
-			    (uint)mod(py, 512) - 254 < 5) {
-				set_pixel(&img, i, j, border);
-			} else {
-				set_pixel(&img, i, j, colours[proc(px, py)]);
+	// Colour border = {.r = 255, .g = 255, .b = 255};
+	for (int cx = 0; cx < gs; cx++) {
+		for (int cy = 0; cy < gs; cy++) {
+			for (int i = 0; i < sz; i++) {
+				for (int j = 0; j < sz; j++) {
+					int px = i + x + BIOME_W * 512 * (gs * cy + cx),
+					    py = j + y;
+					set_pixel(&img, i + sz * cx,
+						    ((sz - j - 1) + sz * cy),
+						    colours[proc(px, py)]);
+				}
 			}
-#else
-			set_pixel(&img, i, sz - j - 1, colours[proc(px, py)]);
-
-#endif
 		}
 	}
 	save_image(&img, "./out.bmp");
