@@ -339,15 +339,28 @@ int main() {
 	ConstructStatics();
 	// LogStatics();
 	Image img;
-	unsigned short sz = 128 + (1 << 9);
-	int gs = 8;
-	new_image(&img, sz * gs, sz * gs);
-	int x = 29 * 512, y = -7 * 512;
-	x -= (sz - 512) / 2;
-	y -= (sz - 512) / 2;
+	int sx = 512;
+	int sy = 512 * 40;
+	int overflow = 128;
+	sx += 2 * overflow;
+	sy += 2 * overflow;
+	new_image(&img, sx, sy);
+	int x = 46 * 512, y = -32 * 512;
+	x -= overflow;
+	y -= overflow;
 	Colour colours[4] = {{.r = 255}, {.g = 255}, {.b = 255}, {}};
+	Colour pink = {.r = 255, .b = 255};
+	for (int i = 0; i < sx; i++) {
+		for (int j = 0; j < sy; j++) {
+			if (i + x > 23593) {
+				set_pixel(&img, i, sy - j, pink);
+			} else {
+				set_pixel(&img, i, sy - j, colours[proc(i + x, y + j)]);
+			}
+		}
+	}
 	// Colour border = {.r = 255, .g = 255, .b = 255};
-	for (int cx = 0; cx < gs; cx++) {
+	/*for (int cx = 0; cx < gs; cx++) {
 		for (int cy = 0; cy < gs; cy++) {
 			for (int i = 0; i < sz; i++) {
 				for (int j = 0; j < sz; j++) {
@@ -359,6 +372,6 @@ int main() {
 				}
 			}
 		}
-	}
+	}*/
 	save_image(&img, "./out.bmp");
 }
